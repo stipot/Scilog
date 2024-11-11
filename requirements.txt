@@ -6,3 +6,4 @@ pymilvus==2.2.11
 transformers
 pyTorch
 setuptools
+zstandard
