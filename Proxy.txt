@@ -1,0 +1,78 @@
+ Изначальная конфигурация :
+services:
+    nginx:
+        image: umputun/nginx-le:latest
+        hostname: nginx
+        restart: always
+        container_name: nginx
+        volumes:
+            - ./ssl:/etc/nginx/ssl
+            - type: bind
+              source: ./etc/service.conf
+              target: /etc/nginx/service.conf
+        ports:
+            - "80:80"
+            - "443:443"
+            - "3000:3000"
+            - "8006:8006"
+        environment:
+            - TZ=Europe/Moscow
+            - LETSENCRYPT=true
+            - LE_EMAIL=connect@stipot.com
+            - LE_FQDN=h.inimatic.com,ru.inimatic.com,ru.api.inimatic.com,v.inimatic.com,stipot.com,r.inimatic.com
+
+volumes:
+    cert_volume: {}
+    acme_challenge: {}
+Service.conf
+map $host $internal_hostname {
+        "h.inimatic.com" "https://192.168.0.26:8006";
+        "r.inimatic.com" "http://192.168.0.1:80";
+        "v.inimatic.com" "https://192.168.0.15:32400";
+        "stipot.com" "https://192.168.0.25";
+        default "localhost";
+}
+Итог:
+services:
+    nginx:
+        image: umputun/nginx-le:latest
+        hostname: nginx
+        restart: always
+        container_name: nginx
+        volumes:
+            - ./ssl:/etc/nginx/ssl
+            - type: bind
+              source: ./etc/service.conf
+              target: /etc/nginx/service.conf
+        ports:
+            - "80:80"
+            - "443:443"
+            - "3000:3000"
+            - "8006:8006"
+            - "8000:8000"
+            - "19530:19530"
+            - "9091:9091"
+        environment:
+            - TZ=Europe/Moscow
+            - LETSENCRYPT=true
+            - LE_EMAIL=connect@stipot.com
+            - LE_FQDN=h.inimatic.com,ru.inimatic.com,ru.api.inimatic.com,v.inimatic.com,stipot.com,r.inimatic.com
+
+volumes:
+    cert_volume: {}
+    acme_challenge: {}
+Service.conf
+map $host $internal_hostname {
+        "h.inimatic.com" "https://192.168.0.26:8006";
+        "r.inimatic.com" "http://192.168.0.1:80";
+        "v.inimatic.com" "https://192.168.0.15:32400";
+        "ru.inimatic.com" "http://192.168.0.28:8000";
+        "ru.api.inimatic.com" "https://192.168.0.27:19530";
+        "ru.api.inimatic.com" "https://192.168.0.27:9091";
+        "stipot.com" "https://192.168.0.25";
+        default "localhost";
+}
+
+
+SApp  192.168.0.28
+Milvus 192.168.0.27
