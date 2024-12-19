@@ -46,3 +46,10 @@
 
 ## Источники
 - [Towhee.io](https://github.com/towhee-io/examples/tree/main/nlp/question_answering) 
+
+## Создание контейнера ProxMox
+конейнер: 105 Milvus 
+Создали template контейнер на основе ubuntu 
+Установили milvus: pip install -U pymilvus 
+Установили milvus_cli: pip install milvus-cli 
+Проверили подключение: milvus_cli > connect -uri http://localhost:19530 
