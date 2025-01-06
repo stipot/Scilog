@@ -20,6 +20,7 @@ host = cfp.get("settings", "host")
 port = cfp.get("settings", "port")
 secure = cfp.getboolean("settings", "secure_boolean")
 token = cfp.get("settings", "token")
+alias = "default"
 
 connections.connect(host=host, port=port, timeout=60, secure=secure)
 
@@ -33,7 +34,7 @@ def create_milvus_collection(collection_name, dim):
         FieldSchema(name="embedding", dtype=DataType.FLOAT_VECTOR, description="embedding vectors", dim=dim),
         FieldSchema(name="text", dtype=DataType.VARCHAR, max_length=1000),
     ]
-    schema = CollectionSchema(fields=fields, description="reverse image search")
+    schema = CollectionSchema(fields=fields, description="Articles collection")
     collection = Collection(name=collection_name, schema=schema)
 
     # create IVF_FLAT index for collection.
@@ -42,10 +43,10 @@ def create_milvus_collection(collection_name, dim):
     return collection
 
 
-collection = create_milvus_collection("testuser2", 768)
-
-
-txt = open("5000.tab", "r")
+src_name = "5000"
+txt = open(f"{src_name}.tab", "r")
+src_name = f"_{src_name}"
+collection = create_milvus_collection(src_name, 768)
 for i in range(5):
     line = txt.readline()
     txtId = line.split("\t")[0]
@@ -59,7 +60,7 @@ for i in range(5):
         .map("question", "vec", ops.text_embedding.dpr(model_name="facebook/dpr-ctx_encoder-single-nq-base"))
         .map("text", "text", lambda x: x)
         .map("vec", "vec", lambda x: x / np.linalg.norm(x, axis=0) if np.linalg.norm(x, axis=0) > 0 else x)
-        .map(("id", "vec", "text"), "insert_status", ops.ann_insert.milvus_client(uri=uri, host=host, port=port, token=token, collection_name="testuser2"))
+        .map(("id", "vec", "text"), "insert_status", ops.ann_insert.milvus_client(uri=uri, host=host, port=port, token=token, collection_name=src_name))
         .output()
     )
 
@@ -74,7 +75,7 @@ p = (
     .map("question", "vec", ops.text_embedding.dpr(model_name="facebook/dpr-ctx_encoder-single-nq-base"))
     .map("text", "text", lambda x: x)
     .map("vec", "vec", lambda x: x / np.linalg.norm(x, axis=0))
-    .map(("id", "vec", "text"), "insert_status", ops.ann_insert.milvus_client(uri=uri, host=host, port=port, token=token, collection_name="testuser2"))
+    .map(("id", "vec", "text"), "insert_status", ops.ann_insert.milvus_client(uri=uri, host=host, port=port, token=token, collection_name=src_name))
     .output()
 )
 for id, chunk in enumerate(chunks[:50]):
@@ -87,7 +88,7 @@ ans_pipe = (
     pipe.input("question")
     .map("question", "vec", ops.text_embedding.dpr(model_name="facebook/dpr-ctx_encoder-single-nq-base"))
     .map("vec", "vec", lambda x: x / np.linalg.norm(x, axis=0))
-    .map("vec", "res", ops.ann_search.milvus_client(uri=uri, host=host, port=port, token=token, collection_name="testuser2", limit=1, **{"output_fields": ["id", "text"]}))
+    .map("vec", "res", ops.ann_search.milvus_client(uri=uri, host=host, port=port, token=token, collection_name=src_name, limit=1, **{"output_fields": ["id", "text"]}))
     .map("res", "answer", lambda x: [x[0][0], x[0][3]])
     .output("question", "answer")
 )
