@@ -26,6 +26,55 @@
  4. Создать вертуальное окружение и установить модули из файла requirements.txt.
 
 
+# Установка Milvus
+
+## Установка Ubuntu 20.04
+
+## Установка docker
+```shell
+apt update
+apt install apt-transport-https ca-certificates curl software-properties-common
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
+apt install docker-ce
+# systemctl status docker
+```
+##  Установка Milvus
+```shell
+wget https://github.com/milvus-io/milvus/releases/download/v2.5.1/milvus-standalone-docker-compose.yml -O docker-compose.yml
+docker compose up -d
+# Требуется время для подъема
+connect -uri http://192.168.0.27:19530
+```
+# Установка sIndex
+## Setup settings.ini
+## Install ssh
+```shell
+apt install openssh-server
+service ssh status
+echo "PermitRootLogin yes" >> PermitRootLogin_yes
+service ssh start
+```
+## Install python
+```shell
+apt update
+apt upgrade
+apt install software-properties-common
+add-apt-repository ppa:deadsnakes/ppa
+apt update
+apt install python3-pip
+python3 -m pip install --upgrade pip
+# apt install python3.10 python3.10-venv
+# python3.10 -m venv .venv
+python3 -m venv .venv
+source .venv/bin/activate
+pip3 install -r requirements.txt
+# python3.10 scilog_index.py
+python3 scilog_index.py
+# milvus-cli
+pip3 install milvus-cli
+```
+
 ## Разработка
 ### Требования
 Для установки и запуска проекта, необходим Python v3.11.2.
